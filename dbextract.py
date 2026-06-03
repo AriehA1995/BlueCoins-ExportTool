@@ -18,10 +18,10 @@ with connect(dbname) as conn :
 
     cur.execute( 
         'SELECT ' 
-		    ' (CAST(T.amount  AS float) / 1000000.0) as Cost, '
+		    ' (CAST(T.amount  AS float) / 1000000.0) as Amount, '
 		    'I.itemName as "Expense Name",'
-		    'T.date as Date,' 
-		    'A.accountName as Payment,'
+		    'datetime(T.date) as Date,' 
+		    'A.accountName as Account,'
 		    'C.childCategoryName as Category '
 	    'FROM TRANSACTIONSTABLE as T, '
 		    'ITEMTABLE as I, '
@@ -30,13 +30,15 @@ with connect(dbname) as conn :
 		'WHERE T.itemID == I.itemTableID and ' 
 		    'T.amount != 0 and '
 		   ' A.accountsTableID == T.accountID and ' 
-            ' C.categoryTableID == T.categoryID' )
+            ' C.categoryTableID == T.categoryID ' 
+        'ORDER BY Date')
 
     rows = cur.fetchall()
+    headers = [description[0] for description in cur.description]
 
-    with open(csvname, "w") as csvfile:
+    with open(csvname, "w", newline='') as csvfile:
         csvWriter = csv.writer(csvfile)
-
+        csvWriter.writerow(headers)
         csvWriter.writerows(rows)
 
 
